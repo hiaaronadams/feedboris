@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feed Boris Game</title>
+<link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Rubik+Bubbles">
+<style>
+
+body, html {
+    margin: 0;
+    height: 100%;
+    font-family: Rubik Bubbles, Arial, sans-serif;
+    overflow: hidden; /* Prevents scrolling */
+  }
+
+body {
+  cursor: grab; /* Sets the default cursor to grab */
+}
+
+body.grabbing {
+  cursor: grabbing; /* Changes the cursor to grabbing when the .grabbing class is added */
+}
+
+/* body.shake-cursor {
+  cursor: url('assets/cursor.png'), auto; /* Ensure the same cursor image is used */
+  animation: shake 0.5s linear infinite;
+} */
+
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 0); }
+  50% { transform: translate(2px, 0); }
+  75% { transform: translate(-2px, 0); }
+}
+
+  #gameArea {
+    position: relative;
+    width: 100%;
+    height: calc(100% - 50px);
+    background-color: #f0f0f0;
+  }
+  #moodMeter {
+    text-align: center;
+    padding: 10px;
+    font-size: 44px;
+  }
+
+#cat-wrap {
+  width: 250px; /* Adjust to the size of your cat image */
+  position: absolute;
+  bottom: 50px; /* Adjust if your image is a different size or if you want it positioned differently */
+  z-index: 1;
+  animation: moveCat 10s infinite alternate linear, float 3s infinite ease-in-out;
+  user-select: none; /* Disable text selection */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+}
+
+#cat {
+    position: relative;
+    max-width: 100%;
+}
+
+#cat-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0px; /* Position the shadow below the cat */
+  left: 0;
+  right: 0;
+  margin: auto;
+  transform: translateX(-50%);
+  width: 80%; /* Width of the shadow */
+  height: 10px; /* Height of the shadow */
+  background: rgba(0, 0, 0, 0.5); /* Shadow color */
+  border-radius: 50%; /* Make it oval */
+  z-index: -1; /* Place it behind the cat */
+  animation: shadowSize 3s infinite ease-in-out;
+  filter: blur(20px);
+}
+
+@keyframes moveCat {
+  0%, 100% { left: 0; }
+  50% { left: calc(100% - 150px); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-60px); }
+}
+
+@keyframes shadowSize {
+  0%, 100% {
+    width: 40%; /* Smaller shadow */
+    height: 10px;
+    transform: translateY(10px);
+  }
+  50% {
+    width: 120%; /* Larger shadow */
+    height: 20px;
+    transform: translateY(50px);
+  }
+}
+
+  .food {
+    position: absolute;
+    z-index: 0;
+    width: 50px; /* Adjust to the size of your food image */
+    animation: fall 2s linear forwards;
+  }
+  @keyframes fall {
+    0% { top: 0; }
+    100% { top: 100%; } /* Fall to the bottom of the game area */
+  }
+  #gameOver {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: red;
+    color: white;
+    padding: 20px;
+    font-size: 2em;
+    border: 3px solid black;
+    z-index: 2;
+  }
+  #cat.flipped{
+    transform: scaleX(1); /* Flips the image horizontally */
+  }
+
+
+@keyframes moveCatFlipped {
+  0%, 100% { transform: scaleX(-1) translateY(0); }
+  50% { transform: scaleX(-1) translateY(-20px); }
+}
+
+
+@keyframes moveAndFloat {
+  0%, 100% { 
+    left: 0;
+    transform: scaleX(1) translateY(0); 
+  }
+  25%, 75% { 
+    transform: scaleX(1) translateY(-20px); 
+  }
+  50% { 
+    left: calc(100% - 150px); 
+    transform: scaleX(-1) translateY(-20px); 
+  }
+}
+
+</style>
+</head>
+<body>
+
+<div id="moodMeter">BORIS MOOD-O-METER: 50% ❤️❤️❤️🖤🖤</div>
+<div id="gameArea" onclick="dropFood(event)">
+  <div id="cat-wrap"><img id="cat" src="cat-right.png" alt="Boris the Cat"></div>
+  <div id="gameOver">BORIS IS SAD!</div>
+</div>
+
+<audio id="hitSound" src="assets/meow-01.mp3" preload="auto"></audio>
+<audio id="catClickSound" src="assets/purr-01.mp3" preload="auto"></audio>
+
+<script>
+ let mood = 50;
+const moodMeter = document.getElementById('moodMeter');
+const gameArea = document.getElementById('gameArea');
+const cat = document.getElementById('cat-wrap');
+const gameOver = document.getElementById('gameOver');
+
+
+// Function to update the mood display
+function updateMoodMeter() {
+  const heartCount = Math.ceil(mood / 20); // 5 hearts, each representing 20%
+  moodMeter.innerHTML = `BORIS MOOD-O-METER: ${mood}% ` + '❤️'.repeat(heartCount) + '🖤'.repeat(5 - heartCount);
+}
+
+// Function to decrease mood every 2 seconds
+let moodInterval = setInterval(() => {
+  mood -= 5;
+  if (mood <= 0) {
+    mood = 0;
+    clearInterval(moodInterval);
+    gameOver.style.display = 'block';
+  }
+  updateMoodMeter();
+}, 2000);
+
+const hitSound = document.getElementById('hitSound');
+const catClickSound = document.getElementById('catClickSound');
+
+cat.addEventListener('click', () => {
+  catClickSound.play(); // Play the sound when the cat is clicked
+});
+
+// Function to drop food where the user clicks
+function dropFood(event) {
+  // Prevents creating food if the game is over
+  if(mood <= 0) return;
+
+  const food = document.createElement('img');
+  food.src = 'food.png'; // Set the correct path to your food image
+  food.className = 'food';
+  food.style.left = `${event.clientX - 25}px`; // Center the food on the click
+  food.style.top = `${event.clientY - 25}px`; // Set the top position to where the click occurred
+  gameArea.appendChild(food);
+
+  // Animation end event to check if the food has landed on Boris
+
+  food.addEventListener('animationend', () => {
+    // Adjusted to check the Y-coordinate for a hit
+    if (food.offsetTop + food.clientHeight >= cat.offsetTop &&
+        food.offsetLeft < cat.offsetLeft + cat.clientWidth &&
+        food.offsetLeft + food.clientWidth > cat.offsetLeft) {
+      mood += 10; // Feed Boris
+      if (mood > 100) mood = 100;
+      updateMoodMeter();
+      hitSound.play(); // Play the sound when the food hits Boris
+    }
+    food.remove(); // Clean up the food element after it falls
+  });
+}
+
+// Assuming you have two images: 'cat.png' (original) and 'cat_flipped.png' (flipped)
+let isFlipped = false;
+
+cat.addEventListener('animationiteration', () => {
+  if (isFlipped) {
+    cat.src = 'cat-right.png'; // Change to your original cat image
+    isFlipped = false;
+  } else {
+    cat.src = 'cat-left.png'; // Change to your flipped cat image
+    isFlipped = true;
+  }
+});
+
+</script>
+
+<script>
+
+document.body.addEventListener('mousedown', () => {
+  document.body.classList.add('grabbing');
+});
+
+document.body.addEventListener('mouseup', () => {
+  document.body.classList.remove('grabbing');
+});
+
+
+</script>
+
+</body>
+</html>
