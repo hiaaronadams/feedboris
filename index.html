@@ -251,6 +251,7 @@ body.grabbing {
     left: 0;
     z-index: 999999;
     max-width: 450px;
+    width: 80%;
     right: 0;
     margin: auto;
     text-align: center;
@@ -276,11 +277,30 @@ body.grabbing {
 
 @media only screen and (max-width: 700px) {
   #moodMeter {
-    font-size: 1.2em;
+    font-size: 0.8em;
   }
+
   #audioToggle {
     top: 60px;
   }
+
+
+.tooltipdesc {
+  font-size: 1.2em;
+
+}
+
+ .gameover {
+    background: rgba(0,0,0,0.85);
+    color: white;
+    padding: 1em;
+    font-size: 1.2em;
+  }
+
+  #cat-wrap {
+  width: 150px; 
+}
+
 }
 
 </style>
@@ -309,7 +329,7 @@ body.grabbing {
 <audio id="crunchSound" src="assets/crunch.m4a" preload="auto"></audio>
 <audio id="catClickSound" src="assets/purr-01.mp3" preload="auto"></audio>
 <audio id="gameoverSound" src="assets/gameover.mp3" preload="auto"></audio>
-<audio id="gameovershameSound" src="assets/gameover-shame.mp3" preload="auto"></audio>
+<audio id="gameovershameSound" src="assets/gameover-shame-2.mp3" preload="auto"></audio>
 <audio id="shakeSound" src="assets/shake.mp3" preload="auto"></audio>
 
 
