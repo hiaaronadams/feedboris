@@ -312,6 +312,28 @@ body.grabbing {
 
 }
 
+@keyframes floatUpFade {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50px); /* Adjust the distance as needed */
+  }
+}
+
+.heart {
+  position: absolute;
+  margin-bottom: 200px;
+  z-index: 9999;
+  font-size: 30px; /* Adjust size as needed */
+  opacity: 0; /* Start invisible */
+  animation: floatUpFade 1s ease-out forwards;
+}
+
+
+
 </style>
 </head>
 <body>
@@ -414,6 +436,8 @@ function dropFood(event) {
 
   // Animation end event to check if the food has landed on Boris
   food.addEventListener('animationend', () => {
+    const foodRect = food.getBoundingClientRect();
+    const catRect = cat.getBoundingClientRect();
     // Adjusted to check the Y-coordinate for a hit
     if (food.offsetTop + food.clientHeight >= cat.offsetTop &&
         food.offsetLeft < cat.offsetLeft + cat.clientWidth &&
@@ -423,11 +447,27 @@ function dropFood(event) {
       updateMoodMeter();
       hitSound.play(); // Play the sound when the food hits Boris
       crunchSound.play(); // Play the sound when the food hits Boris
+      createHearts(food.offsetLeft, food.offsetTop); // Create hearts on collision
       food.remove(); // Clean up the food element after it falls
     }
     food.remove(); // Clean up the food element after it falls
   });
 }
+
+function createHearts(x, y) {
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.textContent = '❤️'; // Heart emoji
+  heart.style.left = x + 'px';
+  heart.style.top = (y - 150) + 'px'; // Start 100px higher
+  document.body.appendChild(heart);
+
+  // Remove heart after animation
+  setTimeout(() => {
+    heart.remove();
+  }, 1000); // Match the duration of the animation
+}
+
 
 const shakeSound = document.getElementById('shakeSound');
 
